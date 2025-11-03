@@ -12,6 +12,8 @@ import MovieDetailPage from './pages/MovieDetailPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import Login from './pages/Login.jsx';
 import AuthRedirect from './pages/AuthRedirect.jsx';
+import ProtectedRoute from './middleware/ProtectedRoute.jsx';
+import AddtoFavorites from './pages/AddtoFavorites.jsx';
 
 
 const router = createBrowserRouter([
@@ -21,7 +23,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        element:  <Home />
       },
       {
         path: "popular-movies",
@@ -42,7 +44,11 @@ const router = createBrowserRouter([
       {
         path: "auth/callback",
         element: <AuthRedirect />,
-      }
+      },
+      {
+        path: "/favorites",
+        element: <AddtoFavorites />,
+      },
     ],
   },
 ]);

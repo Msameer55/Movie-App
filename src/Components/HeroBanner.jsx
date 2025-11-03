@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Autoplay } from 'swiper/modules';
+import { NavLink } from 'react-router-dom';
 
 const HeroBanner = () => {
     const dispatch = useDispatch();
@@ -49,7 +50,7 @@ const HeroBanner = () => {
                                         {item.overview}
                                     </p>
                                     <button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md w-fit">
-                                        Watch Now
+                                        <NavLink to={`/movie/${item.id}`}>Watch Now</NavLink> 
                                     </button>
                                 </div>
                             </div>

@@ -16,8 +16,8 @@ const Login = () => {
     }, [requestToken]);
 
     return (
-        <div className="text-center mt-10">
-            <button onClick={() => dispatch(createRequestToken())} className="bg-red-600 text-white px-4 py-2 rounded">
+        <div className="text-center my-10">
+            <button onClick={() => dispatch(createRequestToken())} className="bg-[#FB2C36] text-white px-4 py-2 rounded cursor-pointer poppins">
                 Login with TMDB
             </button>
         </div>

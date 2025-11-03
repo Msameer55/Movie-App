@@ -20,7 +20,7 @@ export const dayTrendingMovies = createAsyncThunk("movies/dayTrending", async (_
         console.log(response.data.results, "day movies slice")
         return response.data.results;
     } catch (error) {
-        return rejectWithValue(error.response?.data || error.response?.data?.error || "Failed to fetched the upcoming movies")
+        return rejectWithValue(error.response?.data || error.response?.data?.error || "Failed to fetched the day trending movies")
     }
 })
 
@@ -56,6 +56,43 @@ export const searchMovies = createAsyncThunk("movies/search", async (title, { re
 
 })
 
+export const addToFavorites = createAsyncThunk(
+    "movies/addToFavorites",
+    async ({ accountId, sessionId, movieId, favorite }, { rejectWithValue }) => {
+        try {
+            const { data } = await axios.post(
+                `https://api.themoviedb.org/3/account/${accountId}/favorite?api_key=${import.meta.env.VITE_API_KEY}&session_id=${sessionId}`,
+                {
+                    media_type: "movie",
+                    media_id: movieId,
+                    favorite, 
+                }
+            );
+            return data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data || "Failed to update favorite");
+        }
+    }
+);
+
+
+
+export const getFavoriteMovies = createAsyncThunk(
+    "movies/getFavoriteMovies",
+    async ({ accountId, sessionId }, { rejectWithValue }) => {
+        try {
+            const { data } = await axios.get(
+                `https://api.themoviedb.org/3/account/${accountId}/favorite/movies?api_key=${import.meta.env.VITE_API_KEY}&session_id=${sessionId}`
+            );
+            return data.results;
+        } catch (err) {
+            return rejectWithValue(err.response?.data || "Failed to fetch favorite movies");
+        }
+    }
+);
+
+
+
 const initialState = {
     loading: false,
     error: null,
@@ -63,7 +100,8 @@ const initialState = {
     upcomingMoviesList: [],
     dayTrendingMoviesList: [],
     recommendedMovies: [],
-    searchMoviesList: []
+    searchMoviesList: [],
+    favoriteMovies: []
 }
 
 const movieSlice = createSlice({
@@ -123,6 +161,27 @@ const movieSlice = createSlice({
                 state.searchMoviesList = action.payload;
             })
             .addCase(searchMovies.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(addToFavorites.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(addToFavorites.fulfilled, (state, action) => {
+                state.loading = false;
+            })
+            .addCase(addToFavorites.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(getFavoriteMovies.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getFavoriteMovies.fulfilled, (state, action) => {
+                state.loading = false;
+                state.favoriteMovies = action.payload;
+            })
+            .addCase(getFavoriteMovies.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })

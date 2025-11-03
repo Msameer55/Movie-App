@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { upcomingMovies } from '../slices/movieSlice';
 import { toast } from 'react-toastify';
 import MovieCarousel from './MovieCarousel';
+import { NavLink } from 'react-router-dom';
 
 const Upcoming = () => {
     const dispatch = useDispatch();
@@ -36,14 +37,16 @@ const Upcoming = () => {
                     {
                         upComingSlice.map((item, index) => {
                             return (
-                                <div className="card relative" key={index}>
-                                    <div className="card-image">
-                                        <img className='rounded-md' src={item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "https://via.placeholder.com/500x750?text=No+Image}"} alt="" />
+                                <NavLink to={`/movie/${item.id}`} key={index}>
+                                    <div className="card relative" >
+                                        <div className="card-image">
+                                            <img className='rounded-md' src={item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "https://via.placeholder.com/500x750?text=No+Image}"} alt="" />
+                                        </div>
+                                        <div className="title">
+                                            <h4 className='text-white poppins text-sm mt-2 text-ellipsis whitespace-nowrap overflow-hidden'>{item.title}</h4>
+                                        </div>
                                     </div>
-                                    <div className="title">
-                                        <h4 className='text-white poppins text-sm mt-2 text-ellipsis whitespace-nowrap overflow-hidden'>{item.title}</h4>
-                                    </div>
-                                </div>
+                                </NavLink>
 
                             )
                         })

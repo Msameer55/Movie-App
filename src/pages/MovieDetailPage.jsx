@@ -1,34 +1,82 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, Link, NavLink } from "react-router-dom";
-import { getSingleMovie, movieRecommendations } from "../slices/movieSlice";
+import { useParams, Link, NavLink, useNavigate } from "react-router-dom";
+import { addToFavorites, getFavoriteMovies, getSingleMovie, movieRecommendations } from "../slices/movieSlice";
 import ReactSpinner from "../Components/ReactSpinner";
-import { FaRegHeart, FaStar } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaStar } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "react-toastify";
 
 const MovieDetailPage = () => {
     const swiperRef = useRef(null);
-    const castRef = useRef(null)
+    const castRef = useRef(null);
     const dispatch = useDispatch();
     const { id } = useParams();
+    const navigate = useNavigate();
 
-    const { singleMovie, loading, recommendedMovies } = useSelector(
-        (state) => state.movies
-    );
+    const { sessionId, accountId } = useSelector((state) => state.auth);
+    const { favoriteMovies, singleMovie, loading, recommendedMovies } = useSelector((state) => state.movies);
+
+    const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
+        // fetch movie + recommendations
         dispatch(getSingleMovie(id));
         dispatch(movieRecommendations(id));
-        window.scrollTo(0, 0); // scroll to top on navigation
-    }, [dispatch, id]);
 
-    if (loading) {
-        return <ReactSpinner />;
-    }
+        // fetch favorites (only if logged in)
+        if (accountId && sessionId) {
+            dispatch(getFavoriteMovies({ accountId, sessionId }));
+        }
+
+        window.scrollTo(0, 0);
+    }, [dispatch, id, accountId, sessionId]);
+
+    // check if this movie is already a favorite
+    useEffect(() => {
+        if (favoriteMovies && favoriteMovies.length > 0) {
+            const exists = favoriteMovies.some((movie) => movie.id === Number(id));
+            setIsFavorite(exists);
+        }
+    }, [favoriteMovies, id]);
+
+    const handleFavorite = () => {
+        if (!sessionId) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            dispatch(addToFavorites({ accountId, sessionId, movieId: id, favorite: !isFavorite }))
+                .then(() => {
+                    dispatch(getFavoriteMovies({ accountId, sessionId }));
+                    setIsFavorite((prev) => !prev);
+
+                    // ✅ Show toast message based on the new favorite state
+                    if (!isFavorite) {
+                        toast.success("Movie has been added to your favorites");
+                    } else {
+                        toast.success("Movie has been removed from your favorites");
+                    }
+                })
+                .catch(() => {
+                    toast.error("Something went wrong while updating favorites");
+                });
+        } catch (error) {
+            console.error(error);
+            toast.error("Error occurred while updating favorites");
+        }
+    };
+
+
+
+    if (loading) return <ReactSpinner />;
+
+
 
     return (
         <div className="movie-detail-page min-h-screen text-white bg-black">
@@ -65,7 +113,11 @@ const MovieDetailPage = () => {
                                     </p>
                                 )}
                             </div>
-                            <FaRegHeart className="text-white text-3xl cursor-pointer hover:text-red-600 transition" />
+                            {
+                                isFavorite ? <FaHeart onClick={handleFavorite} className="text-3xl cursor-pointer transition text-red-500" />
+                                    : <FaRegHeart onClick={handleFavorite} className="text-3xl cursor-pointer transition text-red-600" />
+                            }
+
                         </div>
 
                         {/* Movie Details */}
@@ -101,56 +153,56 @@ const MovieDetailPage = () => {
                         </div>
 
                         {/* Placeholder for cast (optional) */}
-                       
+
                     </div>
                 </div>
 
-                 <div className="relative">
-                            <h2 className="text-2xl font-semibold mt-6 mb-2 poppins">Cast</h2>
-                            <button
-                                onClick={() => castRef.current?.slidePrev()}
-                                className="z-10 bg-white/20 hover:bg-white/60 absolute top-1/2 left-0 text-white p-2 rounded-md cursor-pointer"
-                            >
-                                <ChevronLeft size={18} />
-                            </button>
-                            <button
-                                onClick={() => castRef.current?.slideNext()}
-                                className="z-10 bg-white/20 hover:bg-white/60 absolute top-1/2 right-0 text-white p-2 rounded-md cursor-pointer"
-                            >
-                                <ChevronRight size={18} />
-                            </button>
-                            <Swiper
-                                onSwiper={(swiper) => (castRef.current = swiper)}
-                                spaceBetween={20}
-                                slidesPerView={4}
-                                breakpoints={{
-                                    640: { slidesPerView: 4 },  
-                                    1024: { slidesPerView: 5 }, 
-                                    1440: { slidesPerView: 6 }, 
-                                }}
-                                navigation
-                            >
-                                {singleMovie.credits?.cast?.map((castMember, index) => (
-                                    <SwiperSlide key={index}>
-                                        <div className="relative ">
-                                            <img
-                                                src={
-                                                    castMember.profile_path
-                                                        ? `https://image.tmdb.org/t/p/w500${castMember.profile_path}`
-                                                        : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                                                }
-                                                alt={castMember.title}
-                                                className=""
-                                            />
-                                            <div className="title my-3">
-                                                <h4 className='text-gray-400 poppins text-sm  text-ellipsis whitespace-nowrap overflow-hidden'>Character: {castMember.character}</h4>
-                                                <h4 className='text-gray-400  poppins text-sm  text-ellipsis whitespace-nowrap overflow-hidden'>Name: {castMember.name}</h4>
-                                            </div>
-                                        </div>
-                                    </SwiperSlide>
-                                ))}
-                            </Swiper>
-                        </div>
+                <div className="relative">
+                    <h2 className="text-2xl font-semibold mt-6 mb-2 poppins">Cast</h2>
+                    <button
+                        onClick={() => castRef.current?.slidePrev()}
+                        className="z-10 bg-white/20 hover:bg-white/60 absolute top-1/2 left-0 text-white p-2 rounded-md cursor-pointer"
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+                    <button
+                        onClick={() => castRef.current?.slideNext()}
+                        className="z-10 bg-white/20 hover:bg-white/60 absolute top-1/2 right-0 text-white p-2 rounded-md cursor-pointer"
+                    >
+                        <ChevronRight size={18} />
+                    </button>
+                    <Swiper
+                        onSwiper={(swiper) => (castRef.current = swiper)}
+                        spaceBetween={20}
+                        slidesPerView={4}
+                        breakpoints={{
+                            640: { slidesPerView: 4 },
+                            1024: { slidesPerView: 5 },
+                            1440: { slidesPerView: 6 },
+                        }}
+                        navigation
+                    >
+                        {singleMovie.credits?.cast?.map((castMember, index) => (
+                            <SwiperSlide key={index}>
+                                <div className="relative ">
+                                    <img
+                                        src={
+                                            castMember.profile_path
+                                                ? `https://image.tmdb.org/t/p/w500${castMember.profile_path}`
+                                                : "/assets/fake-profile.png"
+                                        }
+                                        alt={castMember.title}
+                                        className="h-[200px] object-cover w-full"
+                                    />
+                                    <div className="title my-3">
+                                        <h4 className='text-gray-400 poppins text-sm  text-ellipsis whitespace-nowrap overflow-hidden'>Character: {castMember.character}</h4>
+                                        <h4 className='text-gray-400  poppins text-sm  text-ellipsis whitespace-nowrap overflow-hidden'>Name: {castMember.name}</h4>
+                                    </div>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
 
                 {/* ===== RECOMMENDED MOVIES ===== */}
                 <div className="mt-10">

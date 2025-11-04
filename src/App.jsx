@@ -12,7 +12,7 @@ import 'swiper/css/autoplay';
 const App = () => {
   return (
     <>
-    <ToastContainer position='top right'/>
+    <ToastContainer position='top-right' autoClose={3000}/>
       <Header />
       <main>
         <Outlet />

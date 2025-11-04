@@ -65,7 +65,7 @@ export const addToFavorites = createAsyncThunk(
                 {
                     media_type: "movie",
                     media_id: movieId,
-                    favorite, 
+                    favorite,
                 }
             );
             return data;
@@ -74,8 +74,6 @@ export const addToFavorites = createAsyncThunk(
         }
     }
 );
-
-
 
 export const getFavoriteMovies = createAsyncThunk(
     "movies/getFavoriteMovies",
@@ -91,6 +89,16 @@ export const getFavoriteMovies = createAsyncThunk(
     }
 );
 
+export const getAllMovies = createAsyncThunk("movies/getPopular", async (category, { rejectWithValue }) => {
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/${category}?api_key=${import.meta.env.VITE_API_KEY}`);
+        console.log("response from popular movies", response.data.results)
+        return response.data.results;
+    } catch (error) {
+        return rejectWithValue(err.response?.data || "Failed to fetch favorite movies");
+    }
+})
+
 
 
 const initialState = {
@@ -101,7 +109,8 @@ const initialState = {
     dayTrendingMoviesList: [],
     recommendedMovies: [],
     searchMoviesList: [],
-    favoriteMovies: []
+    favoriteMovies: [],
+    allMovies : []
 }
 
 const movieSlice = createSlice({
@@ -182,6 +191,17 @@ const movieSlice = createSlice({
                 state.favoriteMovies = action.payload;
             })
             .addCase(getFavoriteMovies.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(getAllMovies.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getAllMovies.fulfilled, (state, action) => {
+                state.loading = false;
+                state.allMovies = action.payload;
+            })
+            .addCase(getAllMovies.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })

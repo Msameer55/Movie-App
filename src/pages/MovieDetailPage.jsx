@@ -58,9 +58,9 @@ const MovieDetailPage = () => {
 
                     // ✅ Show toast message based on the new favorite state
                     if (!isFavorite) {
-                        toast.success("Movie has been added to your favorites");
+                        toast.success("Movie has been added to your favorite List");
                     } else {
-                        toast.success("Movie has been removed from your favorites");
+                        toast.success("Movie has been removed from your favorite List");
                     }
                 })
                 .catch(() => {

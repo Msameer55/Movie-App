@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { FaHeart, FaSearch } from 'react-icons/fa'
+import { FaHamburger, FaHeart, FaSearch } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { searchMovies } from '../slices/movieSlice';
-import { LogIn, LogOut, X } from 'lucide-react';
+import { Hamburger, LogIn, LogOut, Menu, X } from 'lucide-react';
 import { logout } from '../slices/authSlice';
+import Navbar from './Navbar';
 
 const Header = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate();
+    const [drawerOpen, setIsDrawerOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const { sessionId, accountId } = useSelector((state) => state.auth);
     const [searchVal, setSearchVal] = useState("");
@@ -47,6 +49,23 @@ const Header = () => {
         };
     }, [searchOpen]);
 
+    const handleMenuClick = () => {
+        setIsDrawerOpen(!drawerOpen);
+    }
+
+        useEffect(() => {
+        if (drawerOpen) {
+            document.body.style.overflow = "hidden";  
+        } else {
+            document.body.style.overflow = "auto";    
+        }
+
+        // cleanup just in case
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [drawerOpen]);
+
     return (
         <div className="header-main-component  px-2 py-6">
             <div className="header-inner page-width ">
@@ -74,10 +93,14 @@ const Header = () => {
                     }
 
                     <div className="icon-container flex gap-2 justify-start">
+                        <div className="hamburger-icon">
+                            <Menu onClick={handleMenuClick} className='text-white text-2xl cursor-pointer' />
+                        </div>
+
                         {
                             accountId ? (
                                 <>
-                                    <div className="search-icon-mobile relative">
+                                    <div className="search-icon-mobile relative block md:hidden">
                                         <FaSearch className="text-white text-2xl cursor-pointer" onClick={handleSearch} />
 
                                         {searchOpen && (
@@ -111,8 +134,6 @@ const Header = () => {
                                             </div>
                                         )}
                                     </div>
-
-
                                     <div className="wishlist-icon relative group inline-block">
                                         <FaHeart onClick={handleAddFavorite} className="text-white text-2xl cursor-pointer hover:text-red-500 transition-colors duration-300" />
 
@@ -143,6 +164,7 @@ const Header = () => {
                     </div>
                 </div>
             </div>
+            <Navbar drawerOpen={drawerOpen} handleMenuClick={handleMenuClick} setIsDrawerOpen={setIsDrawerOpen}/>
         </div>
     )
 }

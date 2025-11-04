@@ -5,7 +5,6 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Home from './pages/Home.jsx';
-import PopularMovies from './pages/PopularMovies.jsx';
 import { Provider } from 'react-redux';
 import { store } from './store/store.js';
 import MovieDetailPage from './pages/MovieDetailPage.jsx';
@@ -14,6 +13,7 @@ import Login from './pages/Login.jsx';
 import AuthRedirect from './pages/AuthRedirect.jsx';
 import ProtectedRoute from './middleware/ProtectedRoute.jsx';
 import AddtoFavorites from './pages/AddtoFavorites.jsx';
+import MoviesList from './pages/MoviesList.jsx';
 
 
 const router = createBrowserRouter([
@@ -24,10 +24,6 @@ const router = createBrowserRouter([
       {
         index: true,
         element:  <Home />
-      },
-      {
-        path: "popular-movies",
-        element: <PopularMovies />,
       },
       {
         path: "movie/:id",
@@ -48,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "/favorites",
         element: <AddtoFavorites />,
+      },
+      {
+        path: "/movies/:category",
+        element: <MoviesList />,
       },
     ],
   },

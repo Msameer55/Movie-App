@@ -40,6 +40,7 @@ const HeroBanner = () => {
                     {bannerMovies.map((item, index) => (
                         <SwiperSlide key={index}>
                             <div className="relative w-full h-[90vh] overflow-hidden">
+                                <div className="overlay absolute top-0 left-0 h-full w-full"></div>
                                 <img src={item.backdrop_path
                                     ? `https://image.tmdb.org/t/p/original${item.backdrop_path}`
                                     : "https://via.placeholder.com/1280x720?text=No+Image"} alt="" className="w-full h-full object-cover object-center brightness-75" />

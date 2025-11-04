@@ -19,8 +19,9 @@ const AddtoFavorites = () => {
     if (loading) return <p className="text-white text-center">Loading...</p>;
 
     return (
-        <div className="favorite-page w-full min-h-screen">
+        <div className="favorite-page w-full min-h-screen my-10">
             <div className="page-width p-4">
+                <h2 className="text-4xl text-white poppins font-bold mb-4">Your Favorites</h2>
                 <div className="grid grid-cols-4 gap-2">
                     {favoriteMovies && favoriteMovies.length > 0 ? (
                         favoriteMovies.map((item, index) => (

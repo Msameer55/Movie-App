@@ -89,16 +89,20 @@ export const getFavoriteMovies = createAsyncThunk(
     }
 );
 
-export const getAllMovies = createAsyncThunk("movies/getPopular", async (category, { rejectWithValue }) => {
-    try {
-        const response = await axios.get(`https://api.themoviedb.org/3/movie/${category}?api_key=${import.meta.env.VITE_API_KEY}`);
-        console.log("response from popular movies", response.data.results)
-        return response.data.results;
-    } catch (error) {
-        return rejectWithValue(err.response?.data || "Failed to fetch favorite movies");
+export const getAllMovies = createAsyncThunk(
+    "movies/getAll",
+    async ({ category, page = 1 }, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(
+                `https://api.themoviedb.org/3/movie/${category}?api_key=${import.meta.env.VITE_API_KEY
+                }&page=${page}`
+            );
+            return { results: response.data.results, page };
+        } catch (err) {
+            return rejectWithValue(err.response?.data || "Failed to fetch movies");
+        }
     }
-})
-
+);
 
 
 const initialState = {
@@ -110,7 +114,8 @@ const initialState = {
     recommendedMovies: [],
     searchMoviesList: [],
     favoriteMovies: [],
-    allMovies : []
+    allMovies: [],
+    page: 1,
 }
 
 const movieSlice = createSlice({
@@ -199,7 +204,12 @@ const movieSlice = createSlice({
             })
             .addCase(getAllMovies.fulfilled, (state, action) => {
                 state.loading = false;
-                state.allMovies = action.payload;
+                if (action.payload.page > 1) {
+                    state.allMovies = [...state.allMovies, ...action.payload.results];
+                } else {
+                    state.allMovies = action.payload.results;
+                }
+                state.page = action.payload.page;
             })
             .addCase(getAllMovies.rejected, (state, action) => {
                 state.loading = false;
